@@ -909,6 +909,10 @@ class UniversalFrontend:
                 )
                 self.pipeline.pop_clipping_shape()
 
+            # Draw ATTRIB entities at last, see #1321
+            # Block reference attributes are located __outside__ the block reference!
+            self.draw_entities(insert.attribs)
+
         if isinstance(entity, Insert):
             self.ctx.push_state(properties)
             if entity.mcount > 1:
