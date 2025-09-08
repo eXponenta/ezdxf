@@ -673,15 +673,17 @@ class UniversalFrontend:
         # stage, see function _draw_viewports()
         if vp.dxf.status < 1:
             return
-        
         # draw viewport outline
         outline = make_path(vp)
         self.pipeline.draw_path(outline, properties)
+        self.pipeline.enter_entity(vp, properties)
 
         if not vp.is_top_view:
             self.log_message("Cannot render non top-view viewports")
-            return
-        self.pipeline.draw_viewport(vp, self.ctx, self._bbox_cache)
+        else:
+            self.pipeline.draw_viewport(vp, self.ctx, self._bbox_cache)
+
+        self.pipeline.exit_entity(entity)
 
     def draw_ole2frame_entity(self, entity: DXFGraphic, properties: Properties) -> None:
         ole2frame = cast(OLE2Frame, entity)
