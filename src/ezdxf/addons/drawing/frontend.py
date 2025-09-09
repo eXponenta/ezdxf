@@ -683,7 +683,7 @@ class UniversalFrontend:
         else:
             self.pipeline.draw_viewport(vp, self.ctx, self._bbox_cache)
 
-        self.pipeline.exit_entity(entity)
+        self.pipeline.exit_entity(vp)
 
     def draw_ole2frame_entity(self, entity: DXFGraphic, properties: Properties) -> None:
         ole2frame = cast(OLE2Frame, entity)
