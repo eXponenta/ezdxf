@@ -674,7 +674,7 @@ class UniversalFrontend:
         if policy == ViewportPolicy.IGNORE:
             return
 
-        if vp.dxf.status < 1:
+        if vp.dxf.status <= 1:
             return
 
         self.pipeline.draw_path(make_path(vp), properties)
