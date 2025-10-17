@@ -184,6 +184,21 @@ class ImagePolicy(Enum):
     IGNORE = auto()
 
 
+class ViewportPolicy(Enum):
+    """This enum is used to define the viewport content rendering.
+
+    Attributes:
+        DISPLAY: draw as has: enter and enumerate entered nodes with reprojection 
+        IGNORE: skip viewport nodes at all,
+        IGNORE_CONTENT: enter to renderable by backend viewport but skip their content
+        IGNORE_CONTENT_RAW: enter to any known viewports without validation ( with status <= 1 and non top ) but skip their content
+    """
+
+    DISPLAY = auto()
+    IGNORE = auto()
+    IGNORE_CONTENT = auto()
+
+
 @dataclass(frozen=True)
 class Configuration:
     """Configuration options for the :mod:`drawing` add-on.
@@ -249,6 +264,7 @@ class Configuration:
         lineweight_policy:
         text_policy:
         image_policy: the method for drawing IMAGE entities
+        viewport_policy: 
 
     """
 
@@ -275,6 +291,7 @@ class Configuration:
     lineweight_policy: LineweightPolicy = LineweightPolicy.ABSOLUTE
     text_policy: TextPolicy = TextPolicy.FILLING
     image_policy: ImagePolicy = ImagePolicy.DISPLAY
+    viewport_policy: ViewportPolicy = ViewportPolicy.DISPLAY
 
     @staticmethod
     def defaults() -> Configuration:

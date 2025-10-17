@@ -41,7 +41,7 @@ from ezdxf.addons.drawing.properties import (
     MODEL_SPACE_BG_COLOR,
     PAPER_SPACE_BG_COLOR,
 )
-from ezdxf.addons.drawing.config import BackgroundPolicy, TextPolicy
+from ezdxf.addons.drawing.config import BackgroundPolicy, TextPolicy, ViewportPolicy
 from ezdxf.addons.drawing.text import simplified_text_chunks
 from ezdxf.addons.drawing.type_hints import FilterFunc
 from ezdxf.addons.drawing.gfxproxy import DXFGraphicProxy
@@ -669,20 +669,27 @@ class UniversalFrontend:
         self.pipeline.draw_filled_polygon(clipping_polygon, properties)
 
     def draw_viewport(self, vp: Viewport, properties: Properties) -> None:
-        # the "active" viewport and invisible viewports should be filtered at this
-        # stage, see function _draw_viewports()
+        policy = self.config.viewport_policy
+ 
+        if policy == ViewportPolicy.IGNORE:
+            return
+
         if vp.dxf.status < 1:
             return
-        # draw viewport outline
-        outline = make_path(vp)
-        self.pipeline.draw_path(outline, properties)
+
+        self.pipeline.draw_path(make_path(vp), properties)
+        
+        # always dispath enter 
         self.pipeline.enter_entity(vp, properties)
 
-        if not vp.is_top_view:
-            self.log_message("Cannot render non top-view viewports")
-        else:
-            self.pipeline.draw_viewport(vp, self.ctx, self._bbox_cache)
+        # but skip when content is not required
+        if policy != ViewportPolicy.IGNORE_CONTENT:
+            if not vp.is_top_view:
+                self.log_message("Cannot render non top-view viewports")
+            else:
+                self.pipeline.draw_viewport(vp, self.ctx, self._bbox_cache)
 
+        # and always emit exit
         self.pipeline.exit_entity(vp)
 
     def draw_ole2frame_entity(self, entity: DXFGraphic, properties: Properties) -> None:
@@ -1033,34 +1040,11 @@ def _draw_entities(
         if properties.is_visible:
             # we should draw viewport in valid order, some other entity can render over it
             if isinstance(entity, Viewport):
-                _draw_viewports(frontend, entity, properties)
+                frontend.draw_viewport(entity, properties)
                 continue
             frontend.draw_entity(entity, properties)
         else:
             frontend.skip_entity(entity, "invisible")
-
-
-def _draw_viewports(frontend: UniversalFrontend, vp: Viewport, properties: Properties ) -> None:
-    # The VIEWPORT attributes "id" and "status" are very unreliable, maybe because of
-    # the "great" documentation by Autodesk.
-    # Viewport status field: (according to the DXF Reference)
-    # -1 = On, but is fully off-screen, or is one of the viewports that is not
-    #      active because the $MAXACTVP count is currently being exceeded.
-    #  0 = Off
-    # <positive value> = On and active. The value indicates the order of
-    # stacking for the viewports, where 1 is the "active" viewport, 2 is the
-    # next, and so on.
-    # The "active" viewport determines how the paperspace layout is presented as a
-    # whole (location & zoom state).
-    # Maybe there are more than one "active" viewports, just remove the first one,
-    # or there is no "active" viewport at all - in this case the "status" attribute
-    # is not reliable at all - but what else is there to do?  The "active" layout should
-    # have the id "1", but this information is also not reliable.
-    if vp.dxf.status <= 1:
-        return
-    
-    # draw viwport content
-    frontend.draw_viewport(vp, properties)
 
 
 def _blend_image_towards(
