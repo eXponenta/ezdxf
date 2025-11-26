@@ -1219,8 +1219,8 @@ class MTextToken:
         self.data = data
 
 
-RE_FLOAT = re.compile(r"[+-]?\d+(:?\.\d*)?(:?[eE][+-]?\d+)?")
-RE_FLOAT_X = re.compile(r"[+-]?\d+(:?\.\d*)?(:?[eE][+-]?\d+)?([x]?)")
+RE_FLOAT = re.compile(r"[+-]?\d*(:?\.\d*)?(:?[eE][+-]?\d+)?")
+RE_FLOAT_X = re.compile(r"[+-]?\d*(:?\.\d*)?(:?[eE][+-]?\d+)?([x]?)")
 
 CHAR_TO_ALIGN = {
     "l": MTextParagraphAlignment.LEFT,
@@ -1544,10 +1544,19 @@ class MTextParser:
         tail = self.scanner.tail()
         pattern = RE_FLOAT_X if relative else RE_FLOAT
         match = re.match(pattern, tail)
+
         if match:
             start, end = match.span()
             result = tail[start:end]
             self.scanner.consume(end)
+
+        # skip pattern like "\W." but pass "W.1"
+        if result.startswith("."):
+            if len(result) == 1:
+                return ""
+
+            return "0" + result
+
         return result
 
     def extract_int_expression(self) -> str:
