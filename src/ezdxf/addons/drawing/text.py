@@ -18,6 +18,7 @@ from ezdxf.fonts import fonts
 from ezdxf.fonts.font_measurements import FontMeasurements
 from ezdxf.tools.text import plain_text, text_wrap
 from .text_renderer import TextRenderer
+from .properties import TextStyleProperties
 
 """
 Search google for 'typography' or 'font anatomy' for explanations of terms like 
