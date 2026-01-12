@@ -671,7 +671,7 @@ class UniversalFrontend:
 
     def draw_viewport(self, vp: Viewport, properties: Properties) -> None:
         policy = self.config.viewport_policy
- 
+
         if policy == ViewportPolicy.IGNORE:
             return
 
@@ -679,8 +679,8 @@ class UniversalFrontend:
             return
 
         self.pipeline.draw_path(make_path(vp), properties)
-        
-        # always dispath enter 
+
+        # always dispath enter
         self.pipeline.enter_entity(vp, properties)
 
         # but skip when content is not required
@@ -726,7 +726,7 @@ class UniversalFrontend:
                 image_path = _find_image_path(
                     self.ctx.document_dir, image_def.dxf.filename
                 )
-                with contextlib.suppress(FileNotFoundError):
+                with contextlib.suppress(FileNotFoundError,  IsADirectoryError):
                     loaded_image = PIL.Image.open(image_path)
 
             if loaded_image is not None:
