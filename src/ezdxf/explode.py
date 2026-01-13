@@ -73,8 +73,8 @@ def explode_block_reference(
     Attached ATTRIB entities are converted to TEXT entities, this is the
     behavior of the BURST command of the AutoCAD Express Tools.
 
-    This method does not apply the clipping path created by the XCLIP command. 
-    The method returns all entities and ignores the clipping path polygon and no 
+    This method does not apply the clipping path created by the XCLIP command.
+    The method returns all entities and ignores the clipping path polygon and no
     entity is clipped.
 
     Args:
@@ -182,8 +182,8 @@ def virtual_block_reference_entities(
     These entities are located at the 'exploded' positions, but are not stored in
     the entity database, have no handle and are not assigned to any layout.
 
-    This method does not apply the clipping path created by the XCLIP command. 
-    The method returns all entities and ignores the clipping path polygon and no 
+    This method does not apply the clipping path created by the XCLIP command.
+    The method returns all entities and ignores the clipping path polygon and no
     entity is clipped.
 
     Args:
@@ -215,7 +215,10 @@ def virtual_block_reference_entities(
                 copy = entity.copy(copy_strategy=copy_strategy)
             except CopyNotSupported:
                 if hasattr(entity, "virtual_entities"):
-                    yield from entity.virtual_entities()
+                    try:
+                        yield from entity.virtual_entities()
+                    except Exception as e2:
+                        skipped_entity_callback(entity, f"error: {str(e2)}")
                 else:
                     skipped_entity_callback(entity, "non copyable")
             else:

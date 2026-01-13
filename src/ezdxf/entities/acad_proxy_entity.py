@@ -96,7 +96,7 @@ class ACADProxyEntity(DXFGraphic):
         from ezdxf.proxygraphic import ProxyGraphic
 
         if self.proxy_graphic:
-            for e in ProxyGraphic(self.proxy_graphic, doc=self.doc).virtual_entities():
+            for e in ProxyGraphic(self.proxy_graphic, doc=self.doc, owner=self).virtual_entities():
                 e.set_source_of_copy(self)
                 yield e
 

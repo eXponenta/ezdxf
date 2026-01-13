@@ -249,8 +249,9 @@ class ProxyGraphicTypes(IntEnum):
 
 class ProxyGraphic:
     def __init__(
-        self, data: bytes, doc: Optional[Drawing] = None, *, dxfversion=const.DXF2000
+        self, data: bytes, doc: Optional[Drawing] = None, owner: Optional[DXFGraphic] = None, *, dxfversion=const.DXF2000
     ):
+        self._owner = owner
         self._doc = doc
         self._factory = factory.new
         self._buffer: bytes = data
@@ -303,7 +304,11 @@ class ProxyGraphic:
         try:
             yield from self.unsafe_virtual_entities()
         except Exception as e:
-            raise ProxyGraphicError(f"Proxy graphic error: {str(e)}")
+            handle = ""
+            if self._owner is not None:
+                handle = self._owner.dxf.handle
+
+            raise ProxyGraphicError(f"Proxy graphic error: {str(e)}, owner handle: {handle}")
 
     def unsafe_virtual_entities(self) -> Iterable[DXFGraphic]:
         def transform(entity):
