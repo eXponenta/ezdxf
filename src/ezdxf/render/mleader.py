@@ -557,6 +557,7 @@ class RenderEngine:
         if not (has_left_underline or has_right_underline):
             return
         connection_point = leader.last_leader_point + _get_dogleg_vector(leader)
+        collinear = leader.dogleg_length < 0.001
         width, height = self.mtext_extents
         length = width + self.context.landing_gap_size
         if length < 1e-9:
@@ -574,7 +575,7 @@ class RenderEngine:
             start2d = Vec2(from_wcs(start))
             up2d = Vec2(from_wcs(mtext.text_direction)).orthogonal()
             cp2d = Vec2(from_wcs(connection_point))
-        is_left = is_point_left_of_line(cp2d, start2d, start2d + up2d)
+        is_left = is_point_left_of_line(cp2d, start2d, start2d + up2d, collinear)
         is_right = not is_left
         line = mtext.text_direction.normalize(length if is_left else -length)
         if (is_left and has_left_underline) or (
