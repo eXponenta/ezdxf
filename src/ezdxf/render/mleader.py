@@ -679,12 +679,16 @@ class RenderEngine:
                 end_tangent = _get_dogleg_vector(leader)
             else:
                 end_tangent = vertices[-1] - vertices[-2]
-            self.add_dxf_spline(
-                vertices,
-                # tangent normalization is not required
-                tangents=[arrow_direction, end_tangent],
-                color=raw_color,
-            )
+
+            if end_tangent.magnitude_square > 0.001:
+                # drop invalid mlead spline
+                # prevent crahs on zero tangent
+                self.add_dxf_spline(
+                    vertices,
+                    # tangent normalization is not required
+                    tangents=[arrow_direction, end_tangent],
+                    color=raw_color,
+                )
 
     def create_arrow_block(self, name: str) -> str:
         if name not in self.doc.blocks:
